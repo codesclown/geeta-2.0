@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+:root {
+  --font-crimson: 'Crimson Text', serif;
+  --font-devanagari: 'Noto Serif Devanagari', serif;
+}
+
+/* ── Lock viewport — no scroll anywhere ── */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+#__next {
+  height: 100%;
+}
+
+/* ── Aged parchment page ── */
+.book-page {
+  background-color: #faf3e0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(120, 70, 10, 0.06) 28px
+    ),
+    radial-gradient(ellipse at center, #fdf8ec 0%, #f5e8c8 100%);
+  font-family: var(--font-crimson), Georgia, serif;
+  /* left spine shadow + right page-edge shadow */
+  box-shadow:
+    inset 6px 0 18px rgba(80, 40, 0, 0.12),
+    inset -2px 0 6px rgba(80, 40, 0, 0.06),
+    inset 0 0 40px rgba(100, 55, 5, 0.06);
+}
+
+/* ── Devanagari ── */
+.devanagari {
+  font-family: var(--font-devanagari), serif;
+}
+
+/* ── Book outer shadow — makes it look like a physical book ── */
+.stf__parent {
+  border-radius: 2px;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.3),
+    0 8px 24px rgba(0,0,0,0.5),
+    0 20px 60px rgba(0,0,0,0.4),
+    4px 0 12px rgba(0,0,0,0.2) !important;
+}
+
+/* ── Book wrapper — adds the thick spine on the left ── */
+.book-wrap {
+  position: relative;
+  border-radius: 2px 4px 4px 2px;
+  box-shadow:
+    -6px 0 0 #5c2d0a,       /* spine thickness */
+    -8px 0 16px rgba(0,0,0,0.6),
+    6px 0 20px rgba(0,0,0,0.3),
+    0 24px 60px rgba(0,0,0,0.5);
+}
+
+/* ── Thin scrollbar ── */
+.book-scroll::-webkit-scrollbar { width: 3px; }
+.book-scroll::-webkit-scrollbar-track { background: #c9a050; }
+.book-scroll::-webkit-scrollbar-thumb { background: #7c4a0a; border-radius: 2px; }
+
+/* ── Book spine (center line between pages on desktop) ── */
+.book-spine::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.25) 20%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.25) 80%, transparent);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── Page curl hint ── */
+.stf__item { cursor: pointer; }
+
+/* ── Om pulse ── */
+@keyframes omPulse {
+  0%, 100% { opacity: 0.85; }
+  50%       { opacity: 1; }
+}
+.om-pulse { animation: omPulse 3s ease-in-out infinite; }
+
+/* ── Floating ambient dust particles (CSS only) ── */
+@keyframes floatUp {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  15%  { opacity: 0.6; }
+  85%  { opacity: 0.3; }
+  100% { transform: translateY(-120px) translateX(var(--dx, 20px)) scale(0.4); opacity: 0; }
+}
+
+.ambient-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251,191,36,0.8), rgba(251,191,36,0));
+  pointer-events: none;
+  animation: floatUp var(--dur, 6s) ease-in-out var(--delay, 0s) infinite;
+}
+
+/* ── Video player volume slider ── */
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+  height: 3px;
+  outline: none;
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fbbf24;
+  cursor: pointer;
+  box-shadow: 0 0 4px rgba(251,191,36,0.6);
+}
+
+/* ── Mobile page fade transition ── */
+@keyframes mobileFadeIn {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Mobile page animation ── */
+@keyframes mobilePageIn {
+  from { opacity: 0.4; transform: scale(0.97); }
+  to   { opacity: 1;   transform: scale(1); }
+}
