@@ -12,7 +12,6 @@ interface BookControlsProps {
   onReadAloud: () => void;
   isReading: boolean;
   chapters: Chapter[];
-  isMobile: boolean;
 }
 
 export default function BookControls({

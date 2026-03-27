@@ -29,13 +29,11 @@ interface Particle {
   vx: number; vy: number;
   size: number; opacity: number; life: number;
 }
-let particleId = 0;
 
 interface BookViewerProps { chapters: Chapter[]; }
 
 export default function BookViewer({ chapters }: BookViewerProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bookRef = useRef<any>(null);
+  const bookRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const containerRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -43,6 +41,7 @@ export default function BookViewer({ chapters }: BookViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const rafRef = useRef<number>(0);
+  const particleIdRef = useRef(0);
 
   const [currentPage, setCurrentPage] = useState(0);
   const [isReading, setIsReading] = useState(false);
@@ -54,11 +53,10 @@ export default function BookViewer({ chapters }: BookViewerProps) {
   const [dims, setDims] = useState<{ w: number; h: number; isDesktop: boolean } | null>(null);
   const totalPages = chapters.length * 3 + 2;
 
-  // Which chapter is currently shown (0-indexed), null if cover/back
-  function getCurrentChapter(page: number): Chapter | null {
+  const getCurrentChapter = useCallback((page: number): Chapter | null => {
     if (page < 1 || page > chapters.length * 3) return null;
     return chapters[Math.floor((page - 1) / 3)] ?? null;
-  }
+  }, [chapters]);
 
   // Stop audio on tab hide
   useEffect(() => {
@@ -156,7 +154,7 @@ export default function BookViewer({ chapters }: BookViewerProps) {
     for (let i = 0; i < 22; i++) {
       const angle = Math.random() * Math.PI * 2, speed = 0.6 + Math.random() * 2.2;
       particlesRef.current.push({
-        id: particleId++,
+        id: particleIdRef.current++,
         x: cx + (Math.random() - 0.5) * 60, y: cy + (Math.random() - 0.5) * 40,
         vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1,
         size: 1.5 + Math.random() * 2.5, opacity: 0, life: 0,
@@ -282,7 +280,7 @@ export default function BookViewer({ chapters }: BookViewerProps) {
             currentPage={currentPage} totalPages={totalPages}
             onPrev={goToPrev} onNext={goToNext} onGoToPage={goToPage}
             onReadAloud={handleReadAloud} isReading={isReading}
-            chapters={chapters} isMobile={true}
+            chapters={chapters}
           />
         </div>
       </div>
@@ -424,7 +422,7 @@ export default function BookViewer({ chapters }: BookViewerProps) {
               currentPage={currentPage} totalPages={totalPages}
               onPrev={goToPrev} onNext={goToNext} onGoToPage={goToPage}
               onReadAloud={handleReadAloud} isReading={isReading}
-              chapters={chapters} isMobile={false}
+              chapters={chapters}
             />
           </div>
         </div>

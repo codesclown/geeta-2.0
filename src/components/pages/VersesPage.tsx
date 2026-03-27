@@ -34,16 +34,18 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
 
     const [sloks, setSloks] = useState<Slok[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
     const [idx, setIdx] = useState(0);
     const [showTranslit, setShowTranslit] = useState(false);
 
     useEffect(() => {
       let cancelled = false;
       setLoading(true);
+      setError(false);
       setIdx(0);
       fetchChapterSloks(chapter.chapter_number, chapter.verses_count)
         .then(data => { if (!cancelled) { setSloks(data); setLoading(false); } })
-        .catch(() => { if (!cancelled) setLoading(false); });
+        .catch(() => { if (!cancelled) { setError(true); setLoading(false); } });
       return () => { cancelled = true; };
     }, [chapter.chapter_number, chapter.verses_count]);
 
@@ -90,6 +92,21 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
               <p className="devanagari text-amber-500/60 text-2xl animate-pulse">ॐ</p>
+            </div>
+          ) : error ? (
+            <div className="flex-1 flex flex-col items-center justify-center gap-3">
+              <p className="text-amber-500/50 text-xs font-serif text-center">
+                {isHindi ? "श्लोक लोड नहीं हो सके" : "Could not load verses"}
+              </p>
+              <button
+                onClick={e => { e.stopPropagation(); setError(false); setLoading(true);
+                  fetchChapterSloks(chapter.chapter_number, chapter.verses_count)
+                    .then(data => { setSloks(data); setLoading(false); })
+                    .catch(() => { setError(true); setLoading(false); });
+                }}
+                className="px-3 py-1 rounded-full text-[10px] font-serif text-amber-700 border border-amber-700/30 hover:bg-amber-800/10 transition-all">
+                {isHindi ? "पुनः प्रयास" : "Retry"}
+              </button>
             </div>
           ) : !slok ? (
             <div className="flex-1 flex items-center justify-center">

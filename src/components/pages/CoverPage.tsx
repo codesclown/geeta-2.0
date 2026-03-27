@@ -21,7 +21,7 @@ const CoverPage = React.forwardRef<HTMLDivElement>((_, ref) => {
         style={{ border: "1px solid rgba(251,191,36,0.15)" }} />
 
       {/* ── Corner flourishes ── */}
-      {(["top-2.5 left-2.5", "top-2.5 right-2.5", "bottom-2.5 left-2.5", "bottom-2.5 right-2.5"] as const).map(
+      {(["top-2.5 left-2.5", "top-2.5 right-2.5", "bottom-2.5 left-2.5", "bottom-2.5 right-2.5"]).map(
         (pos, i) => (
           <div key={i} className={`absolute ${pos} text-amber-500/50 text-xl pointer-events-none`}>
             {i < 2 ? "❧" : "❧"}

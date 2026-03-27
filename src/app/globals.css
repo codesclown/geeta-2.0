@@ -50,17 +50,6 @@ html, body {
     4px 0 12px rgba(0,0,0,0.2) !important;
 }
 
-/* ── Book wrapper — adds the thick spine on the left ── */
-.book-wrap {
-  position: relative;
-  border-radius: 2px 4px 4px 2px;
-  box-shadow:
-    -6px 0 0 #5c2d0a,       /* spine thickness */
-    -8px 0 16px rgba(0,0,0,0.6),
-    6px 0 20px rgba(0,0,0,0.3),
-    0 24px 60px rgba(0,0,0,0.5);
-}
-
 /* ── Thin scrollbar ── */
 .book-scroll {
   -webkit-overflow-scrolling: touch;
@@ -137,4 +126,11 @@ html, body {
 @keyframes mobilePageIn {
   from { opacity: 0.4; transform: scale(0.97); }
   to   { opacity: 1;   transform: scale(1); }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .om-pulse { animation: none; opacity: 0.9; }
+  .ambient-particle { animation: none; display: none; }
+  .stf__item { transition: none; }
 }

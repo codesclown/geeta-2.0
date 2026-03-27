@@ -41,13 +41,6 @@ export async function fetchChapters(): Promise<Chapter[]> {
   return results;
 }
 
-// Fetch a single chapter
-export async function fetchChapter(chapterNumber: number): Promise<Chapter> {
-  const res = await fetch(`${BASE}/chapter/${chapterNumber}`, { cache: "force-cache" });
-  if (!res.ok) throw new Error(`Failed to fetch chapter ${chapterNumber}`);
-  return res.json();
-}
-
 // Fetch a single shlok
 export async function fetchSlok(chapter: number, verse: number): Promise<Slok> {
   const key = `${SLOK_CACHE_PREFIX}${chapter}-${verse}`;

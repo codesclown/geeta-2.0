@@ -38,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="hi">
       <head>
         <meta name="theme-color" content="#1a0800" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

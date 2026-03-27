@@ -26,10 +26,9 @@ export default function VideoPlayer({ videoId, isYoutube = true }: VideoPlayerPr
       <iframe
         key={videoId}
         src={src}
-        frameBorder="0"
         allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
         referrerPolicy="strict-origin-when-cross-origin"
-        style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+        style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
         title="Bhagavad Gita Video"
       />
     </div>

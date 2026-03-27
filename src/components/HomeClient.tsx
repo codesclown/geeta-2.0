@@ -74,6 +74,7 @@ const PARTICLES = [
 export default function HomeClient() {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [tab, setTab] = useState<"book" | "video">("book");
   const [activeVideo, setActiveVideo] = useState(VIDEOS[0]);
   const [isMobile, setIsMobile] = useState(false);
@@ -89,7 +90,9 @@ export default function HomeClient() {
   }, []);
 
   useEffect(() => {
-    fetchChapters().then(data => { setChapters(data); setLoading(false); }).catch(() => setLoading(false));
+    fetchChapters()
+      .then(data => { setChapters(data); setLoading(false); })
+      .catch(() => { setLoadError(true); setLoading(false); });
   }, []);
 
   useEffect(() => {
@@ -110,6 +113,19 @@ export default function HomeClient() {
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center z-50">
           <p className="devanagari text-amber-400 text-xl animate-pulse">ॐ</p>
+        </div>
+      )}
+      {loadError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-50 gap-3">
+          <p className="devanagari text-amber-400 text-lg">ॐ</p>
+          <p className="font-serif text-amber-300/80 text-sm">Could not load chapters. Check your connection.</p>
+          <button
+            onClick={() => { setLoadError(false); setLoading(true);
+              fetchChapters().then(d => { setChapters(d); setLoading(false); }).catch(() => { setLoadError(true); setLoading(false); });
+            }}
+            className="px-4 py-1.5 rounded-full text-xs font-serif border border-amber-700/50 text-amber-400 hover:bg-amber-800/30 transition-all">
+            Retry
+          </button>
         </div>
       )}
       {PARTICLES.map((p, i) => (
@@ -158,7 +174,7 @@ export default function HomeClient() {
         style={{ height: headerH > 0 ? `calc(100dvh - ${headerH}px)` : undefined, flex: headerH > 0 ? "none" : "1 1 0" }}
       >
         <div className={`w-full h-full ${tab === "book" ? "block" : "hidden"}`}>
-          <BookViewer chapters={chapters} />
+          {!loading && !loadError && <BookViewer chapters={chapters} />}
         </div>
 
         {tab === "video" && (
