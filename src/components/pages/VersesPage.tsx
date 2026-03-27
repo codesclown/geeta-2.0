@@ -9,6 +9,8 @@ interface VersesPageProps {
   chapter: Chapter;
   lang: Language;
   fontSize: FontSize;
+  favorites: string[];
+  onToggleFavorite: (key: string) => void;
 }
 
 const fontScaleMap: Record<FontSize, number> = { sm: 0.82, md: 1, lg: 1.18 };
@@ -28,7 +30,7 @@ function getTranslation(slok: Slok, lang: Language): string {
 }
 
 const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
-  ({ chapter, lang, fontSize }, ref) => {
+  ({ chapter, lang, fontSize, favorites, onToggleFavorite }, ref) => {
     const isHindi = lang === "hi";
     const scale = fontScaleMap[fontSize];
 
@@ -37,6 +39,7 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
     const [error, setError] = useState(false);
     const [idx, setIdx] = useState(0);
     const [showTranslit, setShowTranslit] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
       let cancelled = false;
@@ -63,6 +66,18 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
 
     const slok = sloks[idx];
     const translation = slok ? getTranslation(slok, lang) : "";
+    const favKey = `${chapter.chapter_number}-${idx + 1}`;
+    const isFav = favorites.includes(favKey);
+
+    const handleShare = useCallback((e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!slok) return;
+      const text = `${slok.slok}\n\n${translation}\n\n— Bhagavad Gita ${chapter.chapter_number}.${idx + 1}`;
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1800);
+      }).catch(() => {});
+    }, [slok, translation, chapter.chapter_number, idx]);
 
     return (
       <div ref={ref} className="book-page w-full h-full flex flex-col" style={{ overflow: "hidden" }}>
@@ -83,10 +98,31 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
               {isHindi ? "श्लोक" : "Verses"}
             </p>
             {sloks.length > 0 && (
-              <span className="ml-auto text-amber-500/60 text-[9px] font-serif">
+              <span className="text-amber-500/60 text-[9px] font-serif">
                 {idx + 1} / {sloks.length}
               </span>
             )}
+            <div className="ml-auto flex items-center gap-1.5">
+              {slok && (
+                <>
+                  <button
+                    onClick={e => { e.stopPropagation(); onToggleFavorite(favKey); }}
+                    onTouchStart={e => e.stopPropagation()}
+                    title={isFav ? "Remove favorite" : "Add to favorites"}
+                    className="text-[13px] transition-transform active:scale-90"
+                    style={{ opacity: isFav ? 1 : 0.35 }}>
+                    ❤️
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    onTouchStart={e => e.stopPropagation()}
+                    title="Copy verse"
+                    className="text-[11px] font-serif text-amber-600/50 hover:text-amber-500 transition-colors px-1 py-0.5 rounded border border-amber-700/20 hover:border-amber-600/40">
+                    {copied ? "✓" : "⎘"}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           {loading ? (

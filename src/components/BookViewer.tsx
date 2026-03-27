@@ -16,6 +16,8 @@ export type FontSize = "sm" | "md" | "lg";
 
 const DESKTOP_BREAKPOINT = 768;
 const BOOKMARK_KEY = "gita-bookmark";
+const NIGHT_MODE_KEY = "gita-night";
+const FAVORITES_KEY = "gita-favorites";
 
 const flipAudio = typeof window !== "undefined" ? new Audio("/audio/pageflip.mp3") : null;
 function playFlipSound() {
@@ -51,6 +53,8 @@ export default function BookViewer({ chapters }: BookViewerProps) {
   const [bookmarkFlash, setBookmarkFlash] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [dims, setDims] = useState<{ w: number; h: number; isDesktop: boolean } | null>(null);
+  const [nightMode, setNightMode] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>([]); // "ch-verse" keys
   const totalPages = chapters.length * 3 + 2;
 
   const getCurrentChapter = useCallback((page: number): Chapter | null => {
@@ -76,6 +80,25 @@ export default function BookViewer({ chapters }: BookViewerProps) {
   useEffect(() => {
     const saved = localStorage.getItem(BOOKMARK_KEY);
     if (saved) setBookmark(Number(saved));
+    const night = localStorage.getItem(NIGHT_MODE_KEY);
+    if (night === "1") setNightMode(true);
+    const favs = localStorage.getItem(FAVORITES_KEY);
+    if (favs) { try { setFavorites(JSON.parse(favs)); } catch {} }
+  }, []);
+
+  const toggleNightMode = useCallback(() => {
+    setNightMode(v => {
+      localStorage.setItem(NIGHT_MODE_KEY, v ? "0" : "1");
+      return !v;
+    });
+  }, []);
+
+  const toggleFavorite = useCallback((key: string) => {
+    setFavorites(prev => {
+      const next = prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key];
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+      return next;
+    });
   }, []);
 
   // Fullscreen listener
@@ -234,7 +257,7 @@ export default function BookViewer({ chapters }: BookViewerProps) {
   const fontSizeMap: Record<FontSize, string> = { sm: "0.82", md: "1", lg: "1.18" };
 
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-hidden">
+    <div ref={containerRef} className={`relative w-full h-full overflow-hidden${nightMode ? " night-mode" : ""}`}>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-40" />
 
       {/* ── Mobile layout ── */}
@@ -245,6 +268,7 @@ export default function BookViewer({ chapters }: BookViewerProps) {
           saveBookmark={saveBookmark} goToBookmark={goToBookmark}
           bookmark={bookmark} bookmarkFlash={bookmarkFlash}
           toggleFullscreen={toggleFullscreen} isFullscreen={isFullscreen}
+          nightMode={nightMode} toggleNightMode={toggleNightMode}
         />
         {bookmarkFlash && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-amber-700 text-amber-100
@@ -270,7 +294,7 @@ export default function BookViewer({ chapters }: BookViewerProps) {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               <ChapterPage key={`${chapter.chapter_number}-s`} chapter={chapter} lang={lang} pageType="summary" fontSize={fontSize} ref={null as any} />,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              <VersesPage key={`${chapter.chapter_number}-v`} chapter={chapter} lang={lang} fontSize={fontSize} ref={null as any} />,
+              <VersesPage key={`${chapter.chapter_number}-v`} chapter={chapter} lang={lang} fontSize={fontSize} favorites={favorites} onToggleFavorite={toggleFavorite} ref={null as any} />,
             ])}
             <BackCoverPage totalChapters={chapters.length} />
           </HTMLFlipBook>
@@ -320,6 +344,13 @@ export default function BookViewer({ chapters }: BookViewerProps) {
               title="Go to bookmark">📌</button>
           </div>
           <div className="w-8 h-px bg-amber-700/30" />
+          {/* Night mode */}
+          <button onClick={toggleNightMode}
+            className={`w-full py-1.5 rounded-full text-sm transition-all flex items-center justify-center border ${nightMode ? "bg-amber-950 text-amber-400 border-amber-700/50" : "text-amber-500 hover:text-amber-300 border border-amber-700/30"}`}
+            title={nightMode ? "Day mode" : "Night mode"}>
+            {nightMode ? "☀️" : "🌙"}
+          </button>
+          <div className="w-8 h-px bg-amber-700/30" />
           <button onClick={toggleFullscreen}
             className="w-full py-1.5 rounded-full flex items-center justify-center text-amber-500 hover:text-amber-300 border border-amber-700/30 transition-all"
             title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}>
@@ -351,12 +382,13 @@ export default function BookViewer({ chapters }: BookViewerProps) {
                 const makeStack = (count: number, side: "left" | "right") => {
                   const isLeft = side === "left";
                   const coverW = 6;
+                  const coverBg = nightMode ? "#1a0800" : "#3d1a06";
                   return (
                     <div className="absolute pointer-events-none" style={{
                       [isLeft ? "right" : "left"]: "100%",
                       top: 0, bottom: 0,
                       width: count * stripW + coverW,
-                      background: "#3d1a06",
+                      background: coverBg,
                       boxShadow: isLeft
                         ? "-3px 0 10px rgba(0,0,0,0.5)"
                         : "3px 0 10px rgba(0,0,0,0.5)",
@@ -364,20 +396,19 @@ export default function BookViewer({ chapters }: BookViewerProps) {
                       flexDirection: isLeft ? "row" : "row-reverse",
                       alignItems: "stretch",
                     }}>
-                      {/* cover padding */}
                       <div style={{ width: coverW, flexShrink: 0 }} />
                       {[...Array(count)].map((_, i) => {
                         const t = i / Math.max(count - 1, 1);
                         const curve = Math.sin(t * Math.PI);
-                        const lightness = 80 + curve * 10;
-                        const saturation = 18 + curve * 8;
+                        const lightness = nightMode ? (18 + curve * 8) : (80 + curve * 10);
+                        const saturation = nightMode ? (20 + curve * 6) : (18 + curve * 8);
                         return (
                           <div key={i} style={{
                             width: stripW,
                             flexShrink: 0,
                             background: `hsl(32, ${saturation}%, ${lightness}%)`,
-                            borderLeft:  isLeft  && i > 0 ? "0.5px solid rgba(120,70,10,0.15)" : "none",
-                            borderRight: !isLeft && i > 0 ? "0.5px solid rgba(120,70,10,0.15)" : "none",
+                            borderLeft:  isLeft  && i > 0 ? `0.5px solid rgba(${nightMode ? "80,40,5" : "120,70,10"},0.2)` : "none",
+                            borderRight: !isLeft && i > 0 ? `0.5px solid rgba(${nightMode ? "80,40,5" : "120,70,10"},0.2)` : "none",
                           }} />
                         );
                       })}
@@ -410,7 +441,7 @@ export default function BookViewer({ chapters }: BookViewerProps) {
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   <ChapterPage key={`${chapter.chapter_number}-s`} chapter={chapter} lang={lang} pageType="summary" fontSize={fontSize} ref={null as any} />,
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  <VersesPage key={`${chapter.chapter_number}-v`} chapter={chapter} lang={lang} fontSize={fontSize} ref={null as any} />,
+                  <VersesPage key={`${chapter.chapter_number}-v`} chapter={chapter} lang={lang} fontSize={fontSize} favorites={favorites} onToggleFavorite={toggleFavorite} ref={null as any} />,
                 ])}
                 <BackCoverPage totalChapters={chapters.length} />
               </HTMLFlipBook>
@@ -438,9 +469,10 @@ interface MobileSettingsSheetProps {
   saveBookmark: () => void; goToBookmark: () => void;
   bookmark: number | null; bookmarkFlash: boolean;
   toggleFullscreen: () => void; isFullscreen: boolean;
+  nightMode: boolean; toggleNightMode: () => void;
 }
 
-function MobileSettingsSheet({ lang, setLang, fontSize, setFontSize, saveBookmark, goToBookmark, bookmark, bookmarkFlash, toggleFullscreen, isFullscreen }: MobileSettingsSheetProps) {
+function MobileSettingsSheet({ lang, setLang, fontSize, setFontSize, saveBookmark, goToBookmark, bookmark, bookmarkFlash, toggleFullscreen, isFullscreen, nightMode, toggleNightMode }: MobileSettingsSheetProps) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -487,6 +519,10 @@ function MobileSettingsSheet({ lang, setLang, fontSize, setFontSize, saveBookmar
           <button onClick={() => { toggleFullscreen(); setOpen(false); }}
             className="flex-1 py-2.5 rounded-full text-sm font-serif flex items-center justify-center gap-1.5 bg-amber-900/60 text-amber-400 border border-amber-700/40">
             {isFullscreen ? "⊡" : "⛶"} <span>{isFullscreen ? "Exit" : "Full"}</span>
+          </button>
+          <button onClick={() => { toggleNightMode(); }}
+            className={`flex-1 py-2.5 rounded-full text-sm font-serif flex items-center justify-center gap-1.5 border border-amber-700/40 transition-all ${nightMode ? "bg-amber-950 text-amber-400" : "bg-amber-900/60 text-amber-400"}`}>
+            {nightMode ? "☀️" : "🌙"} <span>{nightMode ? "Day" : "Night"}</span>
           </button>
         </div>
       </div>
