@@ -62,6 +62,10 @@ html, body {
 }
 
 /* ── Thin scrollbar ── */
+.book-scroll {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
 .book-scroll::-webkit-scrollbar { width: 3px; }
 .book-scroll::-webkit-scrollbar-track { background: #c9a050; }
 .book-scroll::-webkit-scrollbar-thumb { background: #7c4a0a; border-radius: 2px; }
