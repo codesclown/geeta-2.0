@@ -92,7 +92,14 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
 
         <div className="flex-1 flex flex-col px-4 py-2.5" style={{ minHeight: 0, gap: 8 }}>
           {/* Section label */}
-          <div className="shrink-0 flex items-center gap-2">
+          <div className="shrink-0 flex items-center gap-2"
+            ref={el => {
+              if (!el) return;
+              const stop = (e: TouchEvent) => { e.stopPropagation(); };
+              el.addEventListener("touchstart", stop, { capture: true, passive: false });
+              el.addEventListener("touchend", stop, { capture: true, passive: false });
+            }}
+          >
             <div className="h-3 w-0.5 rounded-full bg-amber-700" />
             <p className="text-amber-700 text-[9px] uppercase tracking-[0.2em] font-serif">
               {isHindi ? "श्लोक" : "Verses"}
@@ -108,6 +115,7 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
                   <button
                     onClick={e => { e.stopPropagation(); onToggleFavorite(favKey); }}
                     onTouchStart={e => e.stopPropagation()}
+                    onTouchEnd={e => e.preventDefault()}
                     title={isFav ? "Remove favorite" : "Add to favorites"}
                     className="text-[13px] transition-transform active:scale-90"
                     style={{ opacity: isFav ? 1 : 0.35 }}>
@@ -116,6 +124,7 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
                   <button
                     onClick={handleShare}
                     onTouchStart={e => e.stopPropagation()}
+                    onTouchEnd={e => e.preventDefault()}
                     title="Copy verse"
                     className="text-[11px] font-serif text-amber-600/50 hover:text-amber-500 transition-colors px-1 py-0.5 rounded border border-amber-700/20 hover:border-amber-600/40">
                     {copied ? "✓" : "⎘"}
@@ -160,10 +169,18 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
               </div>
 
               {/* Transliteration toggle */}
-              <div className="shrink-0">
+              <div className="shrink-0"
+                ref={el => {
+                  if (!el) return;
+                  const stop = (e: TouchEvent) => { e.stopPropagation(); };
+                  el.addEventListener("touchstart", stop, { capture: true, passive: false });
+                  el.addEventListener("touchend", stop, { capture: true, passive: false });
+                }}
+              >
                 <button
                   onClick={e => { e.stopPropagation(); setShowTranslit(v => !v); }}
                   onTouchStart={e => e.stopPropagation()}
+                  onTouchEnd={e => e.preventDefault()}
                   className="text-amber-600/50 text-[9px] font-serif tracking-wider hover:text-amber-500 transition-colors">
                   {showTranslit ? "▲ " : "▼ "}{isHindi ? "लिप्यंतरण" : "Transliteration"}
                 </button>
@@ -185,9 +202,18 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
 
               {/* Navigation */}
               <div className="shrink-0 flex items-center justify-between pt-1.5"
-                style={{ borderTop: "1px solid rgba(120,70,10,0.18)" }}>
+                style={{ borderTop: "1px solid rgba(120,70,10,0.18)" }}
+                ref={el => {
+                  if (!el) return;
+                  const stop = (e: TouchEvent) => { e.stopPropagation(); };
+                  el.addEventListener("touchstart", stop, { capture: true, passive: false });
+                  el.addEventListener("touchend", stop, { capture: true, passive: false });
+                  el.addEventListener("touchmove", stop, { capture: true, passive: false });
+                }}
+              >
                 <button onClick={prev} disabled={idx === 0}
                   onTouchStart={e => e.stopPropagation()}
+                  onTouchEnd={e => e.preventDefault()}
                   className="px-3 py-1 rounded-full text-[10px] font-serif text-amber-700 border border-amber-700/30
                     hover:bg-amber-800/10 disabled:opacity-25 disabled:cursor-not-allowed transition-all">
                   ‹ {isHindi ? "पूर्व" : "Prev"}
@@ -201,6 +227,7 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
                       <button key={realIdx}
                         onClick={e => { e.stopPropagation(); setIdx(realIdx); setShowTranslit(false); }}
                         onTouchStart={e => e.stopPropagation()}
+                        onTouchEnd={e => e.preventDefault()}
                         className={`rounded-full transition-all shrink-0 ${
                           realIdx === idx ? "bg-amber-600 w-1.5 h-1.5" : "bg-amber-700/30 w-1 h-1 hover:bg-amber-600/50"
                         }`} />
@@ -210,6 +237,7 @@ const VersesPage = React.forwardRef<HTMLDivElement, VersesPageProps>(
 
                 <button onClick={next} disabled={idx === sloks.length - 1}
                   onTouchStart={e => e.stopPropagation()}
+                  onTouchEnd={e => e.preventDefault()}
                   className="px-3 py-1 rounded-full text-[10px] font-serif text-amber-700 border border-amber-700/30
                     hover:bg-amber-800/10 disabled:opacity-25 disabled:cursor-not-allowed transition-all">
                   {isHindi ? "अगला" : "Next"} ›

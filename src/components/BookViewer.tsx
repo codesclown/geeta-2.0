@@ -285,7 +285,7 @@ export default function BookViewer({ chapters }: BookViewerProps) {
             startPage={0} showCover={true} mobileScrollSupport={true}
             onFlip={handlePageFlip} style={{ width: "100%", height: "100%" }} className=""
             startZIndex={0} autoSize={true} clickEventForward={false} useMouseEvents={true}
-            swipeDistance={30} showPageCorners={true} disableFlipByClick={false} maxShadowOpacity={0.5}
+            swipeDistance={30} showPageCorners={true} disableFlipByClick={true} maxShadowOpacity={0.5}
           >
             <CoverPage />
             {chapters.flatMap((chapter) => [
