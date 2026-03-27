@@ -1,3 +1,26 @@
+/**
+ * components/pages/VersesPage.tsx
+ * ─────────────────────────────────────────────────────────────
+ * हर chapter का तीसरा page — श्लोक (verses) दिखाता है।
+ *
+ * कैसे काम करता है:
+ * - Component mount होने पर उस chapter के सभी श्लोक fetch होते हैं
+ * - एक बार में एक श्लोक दिखता है (idx state से control)
+ * - Prev/Next buttons से navigate करो
+ * - Dot indicators से directly किसी श्लोक पर jump करो
+ *
+ * Features:
+ * - ❤️ Favorite button — localStorage में save होता है
+ * - ⎘ Copy button — Sanskrit + translation clipboard में copy
+ * - Transliteration toggle — Roman script दिखाओ/छुपाओ
+ * - Error state + Retry button
+ *
+ * Mobile touch fix:
+ * - ref callback से native DOM level पर touchstart/touchend
+ *   stopPropagation होता है (capture: true)
+ * - इससे react-pageflip को touch events नहीं मिलते
+ * - disableFlipByClick={true} से click पर flip नहीं होता
+ */
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";

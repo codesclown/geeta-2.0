@@ -1,3 +1,21 @@
+/**
+ * components/pages/ChapterPage.tsx
+ * ─────────────────────────────────────────────────────────────
+ * हर chapter के दो pages render करता है:
+ *
+ * 1. IntroPage (pageType="intro"):
+ *    - Chapter number, Sanskrit name, transliteration
+ *    - Meaning quote
+ *    - Verse count badge
+ *    - Summary का preview (4 lines clamp)
+ *
+ * 2. SummaryPage (pageType="summary"):
+ *    - पूरा summary text (font size के हिसाब से lines clamp)
+ *    - "श्लोक देखें ↓" hint
+ *
+ * दोनों pages React.forwardRef use करते हैं क्योंकि
+ * react-pageflip को DOM ref चाहिए होता है।
+ */
 import React from "react";
 import { Chapter } from "@/types";
 import { Language, FontSize } from "@/components/BookViewer";

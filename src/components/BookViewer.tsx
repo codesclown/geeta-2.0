@@ -1,3 +1,26 @@
+/**
+ * components/BookViewer.tsx
+ * ─────────────────────────────────────────────────────────────
+ * यह पूरे book experience का core component है।
+ *
+ * Structure:
+ * - हर chapter के 3 pages होते हैं: intro → summary → verses
+ * - Total pages = 18 * 3 + 2 (cover + back cover) = 56
+ * - Desktop: दो pages side-by-side (spread view)
+ * - Mobile: एक page (portrait view), swipe से flip
+ *
+ * Features:
+ * - Page flip animation (react-pageflip library)
+ * - Page flip sound effect
+ * - Canvas particle animation (flip पर golden sparks)
+ * - Keyboard navigation (← → arrows, F = fullscreen)
+ * - Bookmark save/restore (localStorage)
+ * - Night mode (dark parchment)
+ * - Favorite verses (localStorage)
+ * - Text-to-Speech (Web Speech API)
+ * - Dynamic page stack effect (real book feel)
+ * - Responsive layout measurement (ResizeObserver)
+ */
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
